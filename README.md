@@ -5,7 +5,7 @@
 
 ##  usage
 ### requirements
-
+`pip install -r requirements.txt`
 
 ### spider in multi threads
 `python3 main.py`

@@ -79,6 +79,7 @@ class MaziiSpider:
         order="asc",
         limit=0,
         skip=0,
+        save=None,
     ):
         xml = YouDaoXML()
         xml.words = []
@@ -122,6 +123,10 @@ class MaziiSpider:
                     tags=field,
                 )
             )
+        if save:
+            save = Path(save)
+            save.parent.mkdir(exist_ok=True, parents=True)
+            xml.save_xml(save)
         return xml
 
 

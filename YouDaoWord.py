@@ -52,21 +52,21 @@ class YouDaoWord:
         progress.text = self.progress
 
         return item
-    
+
     def as_dict(self):
         """
-            <item>
-                <word>This is a Test这是单词 或者 句子</word>
-                <trans><![CDATA[这是解释]]></trans>
-                <phonetic><![CDATA[这是音标]]></phonetic>
-                <tags>这是分类</tags>
-                <progress>0</progress>
-            </item>
+        <item>
+            <word>This is a Test这是单词 或者 句子</word>
+            <trans><![CDATA[这是解释]]></trans>
+            <phonetic><![CDATA[这是音标]]></phonetic>
+            <tags>这是分类</tags>
+            <progress>0</progress>
+        </item>
         """
         return {
             "word": self.word,
-            "trans": f"<![CDATA[{self.trans}]]>",
-            "phonetic": f"<![CDATA[{self.phonetic}]]>",
+            "trans": f"<![CDATA[{self.trans if self.trans else '' }]]>",
+            "phonetic": f"<![CDATA[{self.phonetic if self.phonetic else ''}]]>",
             "tags": self.tags,
             "progress": self.progress,
         }

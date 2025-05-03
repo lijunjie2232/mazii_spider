@@ -35,8 +35,8 @@ class YouDaoXML:
         """
         if not words:
             words = self.words
-        wordbook = {"wordbook": {"item": [i.as_dict() for i in words]}}
-        return dicttoxml(wordbook, root=False).decode()
+        wordbook = {"wordbook": [i.as_dict() for i in words]}
+        return dicttoxml(wordbook, root=False, attr_type=False).decode()
 
     def save_xml(self, file_path, words=None):
         """

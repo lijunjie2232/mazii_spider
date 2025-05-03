@@ -20,17 +20,17 @@ def spider_process(
 ):
     try:
         spider = MaziiSpider(config=config)
-        words = spider.word_list(sp, mz_dict=mz_dict)
-        if words:
-            # XML_LOCK.acquire()
-            xml = YouDaoXML()
-            xml.words = []
-            xml.save_xml(save, words)
-            # XML_LOCK.release()
+        spider.word_list(sp, mz_dict=mz_dict, save=save)
+        # if words:
+        #     # XML_LOCK.acquire()
+        #     xml = YouDaoXML()
+        #     xml.words = []
+        #     xml.save_xml(save, words)
+        #     # XML_LOCK.release()
     except Exception as _:
         print(f"sp: {sp}, mz_dict: {mz_dict}, save: {save}")
         print_exc()
-        XML_LOCK.release()
+        # XML_LOCK.release()
         exit()
 
 

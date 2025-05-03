@@ -5,6 +5,8 @@ spider:
 
 session:
   binary_path: "local/session.bin"
-  user_agent: "Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6788.76 Safari/537.36"
+  headers:
+    User-Agent: "Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6788.76 Safari/537.36"
+  proxies:
 
 debug_mode: false

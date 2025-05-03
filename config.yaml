@@ -1,0 +1,4 @@
+base_url: "https://example.com"
+timeout: 30
+retries: 5
+debug_mode: true

@@ -1,4 +1,10 @@
-base_url: "https://example.com"
-timeout: 30
-retries: 5
-debug_mode: true
+spider:
+  base_url: "https://mazii.net/ja-JP"
+  timeout: 30
+  retries: 5
+
+session:
+  binary_path: "local/session.bin"
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6788.76 Safari/537.36"
+
+debug_mode: false

@@ -1,13 +1,15 @@
 import requests
 import pickle
+from Config import Config
 
+CONFIG = Config()
 
 class MaziiSpider:
 
     def __init__(
         self,
         word,
-        config=None,
+        config=CONFIG,
     ):
         self.word = word
         self.url = ""

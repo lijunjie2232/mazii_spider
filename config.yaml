@@ -27,4 +27,4 @@ routers:
     method: "GET"
 
 debug_mode: false
-threads: 8
+threads: 16

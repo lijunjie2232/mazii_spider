@@ -10,6 +10,8 @@ from YouDaoWord import YouDaoWord
 from tqdm import tqdm
 from traceback import print_exc
 from copy import deepcopy
+import argparse
+
 
 class MaziiSpider:
 
@@ -107,7 +109,7 @@ class MaziiSpider:
             for skip in tqdm(
                 range(0, data["total"]["value"], limit),
                 leave=False,
-                desc=f"{field}-{mz_dict}"
+                desc=f"{field}-{mz_dict}",
             ):
                 json_data["skip"] = skip
                 resp = self.session.request(
@@ -118,19 +120,22 @@ class MaziiSpider:
                 data = json.loads(resp.text)
                 assert data["status"] == 200, Exception(data["message"])
 
-                for item in data["results"]:
-                    xml.add_word(
-                        YouDaoWord(
-                            word=item["word"],
-                            trans=(
-                                f"({item['phonetic']}); "
-                                if item["phonetic"]
-                                else "" + "; ".join([i["mean"] for i in item["means"]])
-                            ),
-                            phonetic=item["phonetic"],
-                            tags=field,
+                if "results" in data:
+                    for item in data["results"]:
+                        xml.add_word(
+                            YouDaoWord(
+                                word=item["word"],
+                                trans=(
+                                    f"({item['phonetic']}); "
+                                    if item["phonetic"]
+                                    else ""
+                                    # + "; ".join([i["mean"] for i in item["means"]])
+                                    + item["short_mean"]
+                                ),
+                                phonetic=item["phonetic"],
+                                tags=field,
+                            )
                         )
-                    )
             if save:
                 save = Path(save)
                 save.parent.mkdir(exist_ok=True, parents=True)
@@ -141,11 +146,56 @@ class MaziiSpider:
             raise e
 
 
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="config.yaml",
+        help="config file path",
+    )
+    parser.add_argument(
+        "--save",
+        type=str,
+        default="./it.xml",
+        help="save path",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=5000,
+        help="limit of spider",
+    )
+    parser.add_argument(
+        "--field",
+        type=str,
+        required=True,
+        help="filed of word list",
+    )
+    parser.add_argument(
+        "--dict",
+        type=str,
+        default="jaen",
+        help="mazii dict of word list",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    ROOT = Path(__file__).parent.resolve()
-    config = SpiderConfig(config_path=ROOT / "config.yaml")
+    # ROOT = Path(__file__).parent.resolve()
+    # config = SpiderConfig(config_path=ROOT / "config.yaml")
+    # spider = MaziiSpider(config=config)
+    # sp_list = spider.get_specialized_list()
+    # pprint(sp_list)
+    # spider.word_list("it", save=f"it.xml")
+    # pass
+    args = get_args()
+    save = Path(args.save)
+    config = SpiderConfig(config_path=args.config)
     spider = MaziiSpider(config=config)
-    sp_list = spider.get_specialized_list()
-    pprint(sp_list)
-    spider.word_list("it", save=f"it.xml")
-    pass
+    spider.word_list(
+        args.field,
+        mz_dict=args.dict,
+        save=save,
+        limit=args.limit
+    )

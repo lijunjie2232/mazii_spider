@@ -3,11 +3,13 @@ from SpiderConfig import SpiderConfig
 from pathlib import Path
 
 # from tqdm import tqdm
-from multiprocessing.pool import Pool
+# from multiprocessing.pool import Pool
+from multiprocessing.pool import ThreadPool
 from multiprocessing import Lock
 from traceback import print_exc
 import sys
 from YouDaoXML import YouDaoXML
+import subprocess
 
 # XML_LOCK = Lock()
 
@@ -42,8 +44,8 @@ if __name__ == "__main__":
     config = SpiderConfig(config_path=ROOT / "config.yaml")
     spider = MaziiSpider(config=config)
 
-    # pool = ThreadPool(processes=config.threads)
-    pool = Pool(processes=config.threads)
+    # pool = Pool(processes=config.threads)
+    pool = ThreadPool(processes=config.threads)
 
     mz_dict_list = [("jaen", "en"), ("jacn", "zh-cn"), ("jatw", "zh-tw")]
     # loop = tqdm()
@@ -55,10 +57,35 @@ if __name__ == "__main__":
             # use ThreadPool to run spider.word_list in async parallel
             # recall function: spider.word_list(sp, mz_dict).save_xml(f"{sp}_{mz_dict}.xml")
             pool.apply_async(
-                spider_process,
-                args=(config, sp, mz_dict, OUTPUT_DIR / f"{sp}_{mz_dict}.xml"),
-                # callback=lambda x: loop.update(),
-                # callback=lambda x: save_xml(x),
+                subprocess.run,
+                args=(
+                    [
+                        "python",
+                        "MaziiSpider.py",
+                        "--dict",
+                        mz_dict,
+                        "--field",
+                        sp,
+                        "--save",
+                        (OUTPUT_DIR / f"{sp}_{mz_dict}.xml").__str__(),
+                    ],
+                ),
+                kwds={
+                    "check": True,
+                },
+            )
+            subprocess.run(
+                [
+                    "python",
+                    "MaziiSpider.py",
+                    "--dict",
+                    mz_dict,
+                    "--field",
+                    sp,
+                    "--save",
+                    (OUTPUT_DIR / f"{sp}_{mz_dict}.xml").__str__(),
+                ],
+                check=True,
             )
     pool.close()
     pool.join()

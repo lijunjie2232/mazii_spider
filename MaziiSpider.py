@@ -89,8 +89,7 @@ class MaziiSpider:
         json_data["field"] = field
         json_data["dict"] = mz_dict if mz_dict else self.config.dict
         json_data["order"] = order
-        if not limit:
-        json_data["limit"] = 1
+        json_data["limit"] = 1 if not limit else limit
         json_data["skip"] = 0
         resp = self.session.request(
             method=config.method,

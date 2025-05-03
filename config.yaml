@@ -1,7 +1,9 @@
 spider:
-  base_url: "https://mazii.net/ja-JP"
+  api_url: "https://mazii.net/api"
   timeout: 30
   retries: 5
+  dict: "jaen"
+  lang: "ja"
 
 session:
   binary_path: "local/session.bin"
@@ -9,4 +11,18 @@ session:
     User-Agent: "Mozilla/5.0 (Windows NT 10.0; WOW64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6788.76 Safari/537.36"
   proxies:
 
+routers:
+  words:
+    router: "/specialized/words"
+    method: "POST"
+    json:
+      kind: ""
+      field: "it"
+      dict: "jaen"
+      skip: 0
+      limit: 100
+      order: "asc"
+  i18n:
+    router: "https://mazii.net/assets/i18n/%s.json"
+    method: "GET"
 debug_mode: false

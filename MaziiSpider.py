@@ -9,7 +9,7 @@ from YouDaoXML import YouDaoXML
 from YouDaoWord import YouDaoWord
 from tqdm import tqdm
 from traceback import print_exc
-
+from copy import deepcopy
 
 class MaziiSpider:
 
@@ -86,7 +86,7 @@ class MaziiSpider:
             xml = YouDaoXML()
             config = self.routers.words
             url = self.config.api_url + config.router
-            json_data = config.json if "json" in config else None
+            json_data = deepcopy(config.json) if "json" in config else None
             assert json_data is not None
             json_data["field"] = field
             json_data["dict"] = mz_dict if mz_dict else self.config.dict

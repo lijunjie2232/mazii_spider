@@ -36,14 +36,14 @@ class YouDaoXML:
         if not words:
             words = self.words
         wordbook = {"wordbook": {"item": [i.as_dict() for i in words]}}
-        return dicttoxml(wordbook, root=False)
+        return dicttoxml(wordbook, root=False).decode()
 
     def save_xml(self, file_path, words=None):
         """
         将 XML 文档保存到指定路径的文件中。
         """
         # 将 XML 文档转换为字符串
-        xml_str = self.as_xml(words).decode().replace("&gt;", ">").replace("&lt;", "<")
+        xml_str = self.as_xml(words).replace("&gt;", ">").replace("&lt;", "<")
 
         # 将字符串写入文件
         with open(file_path, "w", encoding="utf-8") as f:

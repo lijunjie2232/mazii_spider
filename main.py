@@ -3,13 +3,13 @@ from SpiderConfig import SpiderConfig
 from pathlib import Path
 
 # from tqdm import tqdm
-from multiprocessing.pool import ThreadPool
+from multiprocessing.pool import Pool
 from multiprocessing import Lock
 from traceback import print_exc
 import sys
 from YouDaoXML import YouDaoXML
 
-XML_LOCK = Lock()
+# XML_LOCK = Lock()
 
 
 def spider_process(
@@ -22,11 +22,11 @@ def spider_process(
         spider = MaziiSpider(config=config)
         words = spider.word_list(sp, mz_dict=mz_dict)
         if words:
-            XML_LOCK.acquire()
+            # XML_LOCK.acquire()
             xml = YouDaoXML()
             xml.words = []
             xml.save_xml(save, words)
-            XML_LOCK.release()
+            # XML_LOCK.release()
     except Exception as _:
         print(f"sp: {sp}, mz_dict: {mz_dict}, save: {save}")
         print_exc()
@@ -42,12 +42,12 @@ if __name__ == "__main__":
     config = SpiderConfig(config_path=ROOT / "config.yaml")
     spider = MaziiSpider(config=config)
 
-    pool = ThreadPool(processes=config.threads)
-    # pool = Pool(processes=config.threads)
+    # pool = ThreadPool(processes=config.threads)
+    pool = Pool(processes=config.threads)
 
     mz_dict_list = [("jaen", "en"), ("jacn", "zh-cn"), ("jatw", "zh-tw")]
     # loop = tqdm()
-    
+
     sys.stdout.write("spidring...")
     for mz_dict, lang in mz_dict_list:
         sp_list = spider.get_specialized_list(lang)

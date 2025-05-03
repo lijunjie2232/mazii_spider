@@ -78,12 +78,12 @@ class MaziiSpider:
         field,
         mz_dict=None,
         order="asc",
-        limit=0,
+        limit=5000,
         skip=0,
         save=None,
     ):
         try:
-            words = []
+            xml = YouDaoXML()
             config = self.routers.words
             url = self.config.api_url + config.router
             json_data = config.json if "json" in config else None
@@ -91,7 +91,7 @@ class MaziiSpider:
             json_data["field"] = field
             json_data["dict"] = mz_dict if mz_dict else self.config.dict
             json_data["order"] = order
-            json_data["limit"] = 1 if not limit else limit
+            json_data["limit"] = 1
             json_data["skip"] = 0
             resp = self.session.request(
                 method=config.method,
@@ -102,10 +102,13 @@ class MaziiSpider:
             assert data["status"] == 200, Exception(data["message"])
             if not "total" in data or data["total"]["value"] < 1:
                 return None
-            
-            json_data["limit"] = 1000
-            limit = data["total"]["value"]
-            for skip in range(0, limit, 1000):
+
+            json_data["limit"] = limit
+            for skip in tqdm(
+                range(0, data["total"]["value"], limit),
+                leave=False,
+                desc=f"{field}-{mz_dict}"
+            ):
                 json_data["skip"] = skip
                 resp = self.session.request(
                     method=config.method,
@@ -116,7 +119,7 @@ class MaziiSpider:
                 assert data["status"] == 200, Exception(data["message"])
 
                 for item in data["results"]:
-                    words.append(
+                    xml.add_word(
                         YouDaoWord(
                             word=item["word"],
                             trans=(
@@ -131,8 +134,8 @@ class MaziiSpider:
             if save:
                 save = Path(save)
                 save.parent.mkdir(exist_ok=True, parents=True)
-                YouDaoXML().save_xml(save, words=words)
-            return words
+                xml.save_xml(save)
+            return xml.words
         except Exception as e:
             print_exc()
             raise e
@@ -144,7 +147,5 @@ if __name__ == "__main__":
     spider = MaziiSpider(config=config)
     sp_list = spider.get_specialized_list()
     pprint(sp_list)
-    for mz_dict in tqdm(["jaen", "jacn", "jatw"]):
-        spider.set_dict("")
-        for sp in tqdm(sp_list.keys()):
-            spider.word_list("it", save = f"it_{mz_dict}.xml")
+    spider.word_list("it", save=f"it.xml")
+    pass

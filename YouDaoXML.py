@@ -42,6 +42,7 @@ class YouDaoXML:
 
         # 将 ElementTree 对象转换为字符串
         xml_str = ET.tostring(wordbook, encoding="unicode", method="xml")
+        del wordbook
         return xml_str
 
     def save_xml(self, file_path, words=None):

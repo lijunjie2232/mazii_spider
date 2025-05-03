@@ -4,21 +4,33 @@ from pathlib import Path
 
 # from tqdm import tqdm
 from multiprocessing.pool import ThreadPool
+from multiprocessing import Lock
 from traceback import print_exc
 import sys
+from YouDaoXML import YouDaoXML
+
+XML_LOCK = Lock()
+
 
 def spider_process(
     config,
     sp,
-    mz_dict="jaen",
-    save=None,
+    mz_dict,
+    save,
 ):
     try:
         spider = MaziiSpider(config=config)
-        spider.word_list(sp, mz_dict=mz_dict, save=save)
+        words = spider.word_list(sp, mz_dict=mz_dict)
+        if words:
+            XML_LOCK.acquire()
+            xml = YouDaoXML(words)
+            xml.save_xml(save)
+            XML_LOCK.release()
     except Exception as _:
         print(f"sp: {sp}, mz_dict: {mz_dict}, save: {save}")
         print_exc()
+        XML_LOCK.release()
+        exit()
 
 
 if __name__ == "__main__":
@@ -28,7 +40,7 @@ if __name__ == "__main__":
 
     config = SpiderConfig(config_path=ROOT / "config.yaml")
     spider = MaziiSpider(config=config)
-    
+
     pool = ThreadPool(processes=config.threads)
     # pool = Pool(processes=config.threads)
 
@@ -43,16 +55,9 @@ if __name__ == "__main__":
             # recall function: spider.word_list(sp, mz_dict).save_xml(f"{sp}_{mz_dict}.xml")
             pool.apply_async(
                 spider_process,
-                args=(
-                    config,
-                    sp,
-                ),
-                kwds={
-                    "mz_dict": mz_dict,
-                    "save": OUTPUT_DIR / f"{sp}_{mz_dict}.xml",
-                },
+                args=(config, sp, mz_dict, OUTPUT_DIR / f"{sp}_{mz_dict}.xml"),
                 # callback=lambda x: loop.update(),
-                callback=lambda _: sys.stdout.write("."),
+                # callback=lambda x: save_xml(x),
             )
     pool.close()
     pool.join()

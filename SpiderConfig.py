@@ -3,6 +3,7 @@ from collections import namedtuple
 from omegaconf import OmegaConf
 from pprint import pprint
 from functools import wraps
+from utils import to_dict
 
 
 class SpiderConfig(OmegaConf):
@@ -36,7 +37,9 @@ class SpiderConfig(OmegaConf):
         )
 
 
+
 if __name__ == "__main__":
     config = SpiderConfig(config_path="config.yaml")
     pprint(config)
+    pprint(to_dict(config.session))
     pass

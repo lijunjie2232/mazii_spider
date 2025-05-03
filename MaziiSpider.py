@@ -1,6 +1,7 @@
 import requests
 import pickle
 from SpiderConfig import SpiderConfig
+from utils import to_dict
 from pathlib import Path
 import json
 from pprint import pprint

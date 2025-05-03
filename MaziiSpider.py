@@ -3,6 +3,7 @@ import pickle
 from SpiderConfig import SpiderConfig
 from pathlib import Path
 import json
+from pprint import pprint
 
 
 class MaziiSpider:
@@ -38,7 +39,7 @@ class MaziiSpider:
         with open(self.session_config.binary_path, "wb") as f:
             pickle.dump(self.session, f)
 
-    def login():
+    def login(self):
         pass
 
     def get_i18n(self, lang=None):
@@ -94,4 +95,7 @@ if __name__ == "__main__":
     ROOT = Path(__file__).parent.resolve()
     config = SpiderConfig(config_path=ROOT / "config.yaml")
     spider = MaziiSpider(config=config)
+    sp_list = spider.get_specialized_list()
+    pprint(sp_list)
+    spider.word_list("it")
     pass

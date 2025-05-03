@@ -14,7 +14,7 @@ class YouDaoXML:
         """
         self.words.append(word)
 
-    def as_xml(self):
+    def as_xml(self, words=None):
         """
         返回包含所有单词的完整 XML 文档。
         """
@@ -33,19 +33,23 @@ class YouDaoXML:
         wordbook = ET.Element("wordbook")
 
         # 遍历所有单词，将每个单词转换为 XML 节点并添加到 <wordbook> 中
-        for word in self.words:
-            wordbook.append(word.as_node())
+        if words:
+            for word in words:
+                wordbook.append(word.as_node())
+        else:
+            for word in self.words:
+                wordbook.append(word.as_node())
 
         # 将 ElementTree 对象转换为字符串
         xml_str = ET.tostring(wordbook, encoding="unicode", method="xml")
         return xml_str
 
-    def save_xml(self, file_path):
+    def save_xml(self, file_path, words=None):
         """
         将 XML 文档保存到指定路径的文件中。
         """
         # 将 XML 文档转换为字符串
-        xml_str = self.as_xml().replace("&gt;", ">").replace("&lt;", "<")
+        xml_str = self.as_xml(words).replace("&gt;", ">").replace("&lt;", "<")
 
         # 将字符串写入文件
         with open(file_path, "w", encoding="utf-8") as f:

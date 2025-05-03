@@ -8,6 +8,7 @@ from pprint import pprint
 from YouDaoXML import YouDaoXML
 from YouDaoWord import YouDaoWord
 from tqdm import tqdm
+from traceback import print_exc
 
 
 class MaziiSpider:
@@ -81,53 +82,60 @@ class MaziiSpider:
         skip=0,
         save=None,
     ):
-        xml = YouDaoXML()
-        xml.words = []
-        config = self.routers.words
-        url = self.config.api_url + config.router
-        json_data = config.json if "json" in config else None
-        assert json_data is not None
-        json_data["field"] = field
-        json_data["dict"] = mz_dict if mz_dict else self.config.dict
-        json_data["order"] = order
-        json_data["limit"] = 1 if not limit else limit
-        json_data["skip"] = 0
-        resp = self.session.request(
-            method=config.method,
-            url=url,
-            json=to_dict(json_data),
-        )
-        data = json.loads(resp.text)
-        assert data["status"] == 200, Exception(data["message"])
-        if not "total" in data or data["total"]["value"] < 1:
-            return xml
-        json_data["limit"] = data["total"]["value"] + 1
-        resp = self.session.request(
-            method=config.method,
-            url=url,
-            json=to_dict(json_data),
-        )
-        data = json.loads(resp.text)
-        assert data["status"] == 200, Exception(data["message"])
-
-        for item in data["results"]:
-            xml.add_word(
-                YouDaoWord(
-                    word=item["word"],
-                    trans=(
-                        f"({item['phonetic']}); "
-                        if item["phonetic"]
-                        else "" + "; ".join([i["mean"] for i in item["means"]])
-                    ),
-                    phonetic=item["phonetic"],
-                    tags=field,
-                )
+        try:
+            words = []
+            config = self.routers.words
+            url = self.config.api_url + config.router
+            json_data = config.json if "json" in config else None
+            assert json_data is not None
+            json_data["field"] = field
+            json_data["dict"] = mz_dict if mz_dict else self.config.dict
+            json_data["order"] = order
+            json_data["limit"] = 1 if not limit else limit
+            json_data["skip"] = 0
+            resp = self.session.request(
+                method=config.method,
+                url=url,
+                json=to_dict(json_data),
             )
-        if save:
-            save = Path(save)
-            save.parent.mkdir(exist_ok=True, parents=True)
-            xml.save_xml(save)
-        return xml
+            data = json.loads(resp.text)
+            assert data["status"] == 200, Exception(data["message"])
+            if not "total" in data or data["total"]["value"] < 1:
+                return None
+            
+            json_data["limit"] = 1000
+            limit = data["total"]["value"]
+            for skip in range(0, limit, 1000):
+                json_data["skip"] = skip
+                resp = self.session.request(
+                    method=config.method,
+                    url=url,
+                    json=to_dict(json_data),
+                )
+                data = json.loads(resp.text)
+                assert data["status"] == 200, Exception(data["message"])
+
+                for item in data["results"]:
+                    words.append(
+                        YouDaoWord(
+                            word=item["word"],
+                            trans=(
+                                f"({item['phonetic']}); "
+                                if item["phonetic"]
+                                else "" + "; ".join([i["mean"] for i in item["means"]])
+                            ),
+                            phonetic=item["phonetic"],
+                            tags=field,
+                        )
+                    )
+            if save:
+                save = Path(save)
+                save.parent.mkdir(exist_ok=True, parents=True)
+                YouDaoXML().save_xml(save, words=words)
+            return words
+        except Exception as e:
+            print_exc()
+            raise e
 
 
 if __name__ == "__main__":
@@ -139,4 +147,4 @@ if __name__ == "__main__":
     for mz_dict in tqdm(["jaen", "jacn", "jatw"]):
         spider.set_dict("")
         for sp in tqdm(sp_list.keys()):
-            spider.word_list("it").save_xml(f"it_{mz_dict}.xml")
+            spider.word_list("it", save = f"it_{mz_dict}.xml")

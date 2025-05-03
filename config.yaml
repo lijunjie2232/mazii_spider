@@ -25,4 +25,6 @@ routers:
   i18n:
     router: "https://mazii.net/assets/i18n/%s.json"
     method: "GET"
+
 debug_mode: false
+threads: 8

@@ -67,15 +67,17 @@ class MaziiSpider:
     def set_dict(self, mz_dict):
         self.config.dict = mz_dict
 
-    def get_specialized_list(self):
-        return self.get_i18n()["specialized"]
+    def get_specialized_list(self, lang=""):
+        if not lang:
+            lang = self.config.lang
+        return self.get_i18n(lang=lang)["specialized"]
 
     def word_list(
         self,
         field,
         mz_dict=None,
         order="asc",
-        limit=100,
+        limit=0,
         skip=0,
     ):
         xml = YouDaoXML()
@@ -87,14 +89,18 @@ class MaziiSpider:
         json_data["field"] = field
         json_data["dict"] = mz_dict if mz_dict else self.config.dict
         json_data["order"] = order
-        json_data["limit"] = limit
-        json_data["skip"] = skip
+        if not limit:
+        json_data["limit"] = 1
+        json_data["skip"] = 0
         resp = self.session.request(
             method=config.method,
             url=url,
             json=to_dict(json_data),
         )
         data = json.loads(resp.text)
+        assert data["status"] == 200, Exception(data["message"])
+        if not "total" in data or data["total"]["value"] < 1:
+            return xml
         json_data["limit"] = data["total"]["value"] + 1
         resp = self.session.request(
             method=config.method,
@@ -130,4 +136,3 @@ if __name__ == "__main__":
         spider.set_dict("")
         for sp in tqdm(sp_list.keys()):
             spider.word_list("it").save_xml(f"it_{mz_dict}.xml")
-    pass

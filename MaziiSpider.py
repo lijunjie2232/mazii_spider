@@ -5,6 +5,9 @@ from utils import to_dict
 from pathlib import Path
 import json
 from pprint import pprint
+from YouDaoXML import YouDaoXML
+from YouDaoWord import YouDaoWord
+from tqdm import tqdm
 
 
 class MaziiSpider:
@@ -75,6 +78,8 @@ class MaziiSpider:
         limit=100,
         skip=0,
     ):
+        xml = YouDaoXML()
+        xml.words = []
         config = self.routers.words
         url = self.config.api_url + config.router
         json_data = config.json if "json" in config else None
@@ -87,9 +92,32 @@ class MaziiSpider:
         resp = self.session.request(
             method=config.method,
             url=url,
-            json=json_data,
+            json=to_dict(json_data),
         )
-        pass
+        data = json.loads(resp.text)
+        json_data["limit"] = data["total"]["value"] + 1
+        resp = self.session.request(
+            method=config.method,
+            url=url,
+            json=to_dict(json_data),
+        )
+        data = json.loads(resp.text)
+        assert data["status"] == 200, Exception(data["message"])
+
+        for item in data["results"]:
+            xml.add_word(
+                YouDaoWord(
+                    word=item["word"],
+                    trans=(
+                        f"({item['phonetic']}); "
+                        if item["phonetic"]
+                        else "" + "; ".join([i["mean"] for i in item["means"]])
+                    ),
+                    phonetic=item["phonetic"],
+                    tags=field,
+                )
+            )
+        return xml
 
 
 if __name__ == "__main__":
@@ -98,5 +126,8 @@ if __name__ == "__main__":
     spider = MaziiSpider(config=config)
     sp_list = spider.get_specialized_list()
     pprint(sp_list)
-    spider.word_list("it")
+    for mz_dict in tqdm(["jaen", "jacn", "jatw"]):
+        spider.set_dict("")
+        for sp in tqdm(sp_list.keys()):
+            spider.word_list("it").save_xml(f"it_{mz_dict}.xml")
     pass

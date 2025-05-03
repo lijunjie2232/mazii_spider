@@ -23,8 +23,9 @@ def spider_process(
         words = spider.word_list(sp, mz_dict=mz_dict)
         if words:
             XML_LOCK.acquire()
-            xml = YouDaoXML(words)
-            xml.save_xml(save)
+            xml = YouDaoXML()
+            xml.words = []
+            xml.save_xml(save, words)
             XML_LOCK.release()
     except Exception as _:
         print(f"sp: {sp}, mz_dict: {mz_dict}, save: {save}")
@@ -46,7 +47,7 @@ if __name__ == "__main__":
 
     mz_dict_list = [("jaen", "en"), ("jacn", "zh-cn"), ("jatw", "zh-tw")]
     # loop = tqdm()
-
+    
     sys.stdout.write("spidring...")
     for mz_dict, lang in mz_dict_list:
         sp_list = spider.get_specialized_list(lang)
